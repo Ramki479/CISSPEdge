@@ -35,8 +35,8 @@ function DragReorder({ items, onChange, disabled }: DragReorderProps) {
           whileDrag={{
             scale: 1.03,
             boxShadow: '0 8px 30px rgba(99, 102, 241, 0.25)',
-            borderColor: 'rgba(99, 102, 241, 0.6)',
-            backgroundColor: 'rgba(99, 102, 241, 0.08)',
+            borderColor: 'var(--color-accent)',
+            backgroundColor: 'var(--color-surface-hover)',
             zIndex: 50,
             transition: { duration: 0.15 },
           }}
@@ -134,8 +134,8 @@ function MatchFollowing({ pairs, onChange, disabled }: MatchFollowingProps) {
   return (
     <div>
       {/* Instructions */}
-      <div className="mb-4 p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
-        <p className="text-sm text-purple-300">
+      <div className="mb-4 p-3 bg-accent/10 rounded-xl border border-accent/20">
+        <p className="text-sm text-accent">
           <span className="font-medium">👆 Click to match:</span> Tap a left item, then tap its matching item on the right.
         </p>
       </div>
@@ -145,9 +145,9 @@ function MatchFollowing({ pairs, onChange, disabled }: MatchFollowingProps) {
         <motion.div
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 p-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20 text-center"
+          className="mb-4 p-2 bg-accent/10 rounded-lg border border-accent/20 text-center"
         >
-          <span className="text-sm text-indigo-300">
+          <span className="text-sm text-accent">
             Selected: <strong>{selectedLeft}</strong> — now tap its match on the right
           </span>
         </motion.div>
@@ -257,8 +257,8 @@ export function DragDropQuestion({ type, dragItems, matchPairs, onAnswer, disabl
   if (type === 'drag-drop' && dragItems) {
     return (
       <div>
-        <div className="mb-4 p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-          <p className="text-sm text-indigo-300">
+        <div className="mb-4 p-3 bg-accent/10 rounded-xl border border-accent/20">
+          <p className="text-sm text-accent">
             <span className="font-medium">🖱 Drag to reorder:</span> Arrange the items in the correct order.
           </p>
         </div>
@@ -276,8 +276,8 @@ export function DragDropQuestion({ type, dragItems, matchPairs, onAnswer, disabl
   if (type === 'match-following' && matchPairs) {
     return (
       <div>
-        <div className="mb-4 p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
-          <p className="text-sm text-purple-300">
+        <div className="mb-4 p-3 bg-accent/10 rounded-xl border border-accent/20">
+          <p className="text-sm text-accent">
             <span className="font-medium">🔗 Match the following:</span> Drag each item from the left to its matching pair on the right.
           </p>
         </div>

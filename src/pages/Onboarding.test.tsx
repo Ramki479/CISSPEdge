@@ -12,29 +12,37 @@ vi.mock('react-router-dom', () => ({
 }))
 
 const mockInitializeUserProgress = vi.fn()
+const mockSeedTestDataIfNeeded = vi.fn().mockResolvedValue(undefined)
 
 vi.mock('../data/database', () => ({
   initializeUserProgress: (...args: unknown[]) =>
     mockInitializeUserProgress(...args),
+  seedTestDataIfNeeded: (...args: unknown[]) =>
+    mockSeedTestDataIfNeeded(...args),
 }))
+
+// Helper to find the start/submit button (the one with ▸ or "select a level")
+function getStartButton(): HTMLElement | null {
+  const buttons = screen.getAllByRole('button')
+  return buttons.find(b =>
+    b.textContent?.includes('select a level') ||
+    b.textContent?.includes('▸ Begin') ||
+    b.textContent?.includes('initializing')
+  ) || null
+}
 
 // ─── Test suite ────────────────────────────────────────────────────────────────
 
 describe('Onboarding', () => {
-  // Keep references to spied globals so we can assert on them
   let alertSpy: ReturnType<typeof vi.spyOn>
   let consoleLogSpy: ReturnType<typeof vi.spyOn>
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
     vi.clearAllMocks()
-
-    // Spy on global browser APIs
     alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-    // Default: init resolves successfully
     mockInitializeUserProgress.mockResolvedValue(undefined)
   })
 
@@ -43,11 +51,9 @@ describe('Onboarding', () => {
   describe('rendering', () => {
     it('renders the heading and tagline', () => {
       render(<Onboarding />)
-      expect(screen.getByText('CISSP Preparation Coach')).toBeInTheDocument()
+      expect(screen.getByText('CISSP Edge')).toBeInTheDocument()
       expect(
-        screen.getByText(
-          'Your personalized offline guide to CISSP certification success',
-        ),
+        screen.getByText('Your offline-first CISSP preparation system'),
       ).toBeInTheDocument()
     })
 
@@ -60,8 +66,9 @@ describe('Onboarding', () => {
 
     it('renders the start button with default text', () => {
       render(<Onboarding />)
-      const btn = screen.getByRole('button', { name: /select your level/i })
-      expect(btn).toBeInTheDocument()
+      const btn = getStartButton()
+      expect(btn).toBeTruthy()
+      expect(btn!.textContent).toContain('select a level')
       expect(btn).not.toBeDisabled()
     })
   })
@@ -75,31 +82,27 @@ describe('Onboarding', () => {
 
       const beginnerBtn = screen.getByRole('button', { name: /beginner/i })
 
-      // Before click – card should NOT have the selected border class
-      expect(beginnerBtn.className).not.toContain('border-indigo-500')
+      // Before click – card should NOT have the selected styling
+      expect(beginnerBtn.className).not.toContain('border-[#00f0ff]')
 
       await user.click(beginnerBtn)
 
-      // After click – card should have the selected styling
-      expect(beginnerBtn.className).toContain('border-indigo-500')
+      // After click – card should have the selected border class
+      expect(beginnerBtn.className).toContain('border-[#00f0ff]')
     })
 
-    it('updates button text to "Begin Your Journey" after selection', async () => {
+    it('updates button text to ▸ Begin after selection', async () => {
       const user = userEvent.setup()
       render(<Onboarding />)
 
-      // Initially the button says "Select Your Level"
-      expect(
-        screen.getByRole('button', { name: /select your level/i }),
-      ).toBeInTheDocument()
+      // Initially the button says "select a level"
+      expect(getStartButton()!.textContent).toContain('select a level')
 
       // Click a level card
       await user.click(screen.getByRole('button', { name: /beginner/i }))
 
-      // Button text should now be "Begin Your Journey →"
-      expect(
-        screen.getByRole('button', { name: /begin your journey/i }),
-      ).toBeInTheDocument()
+      // Start button text should update to "▸ Begin"
+      expect(getStartButton()!.textContent).toContain('▸ Begin')
     })
 
     it('removes highlight from previously selected card when another is clicked', async () => {
@@ -110,25 +113,22 @@ describe('Onboarding', () => {
       const intermediateBtn = screen.getByRole('button', { name: /intermediate/i })
 
       await user.click(beginnerBtn)
-      expect(beginnerBtn.className).toContain('border-indigo-500')
+      expect(beginnerBtn.className).toContain('border-[#00f0ff]')
 
       await user.click(intermediateBtn)
-      expect(beginnerBtn.className).not.toContain('border-indigo-500')
-      expect(intermediateBtn.className).toContain('border-indigo-500')
+      expect(beginnerBtn.className).not.toContain('border-[#00f0ff]')
+      expect(intermediateBtn.className).toContain('border-[#00f0ff]')
     })
   })
 
   // ── Alert on no level selected ───────────────────────────────────────────────
 
   describe('alert when no level is selected', () => {
-    it('shows an alert when "Begin Your Journey" is clicked with no selection', async () => {
+    it('shows an alert when start button is clicked with no selection', async () => {
       const user = userEvent.setup()
       render(<Onboarding />)
 
-      // "Begin Your Journey" text is NOT shown because no level is selected;
-      // the button text is "Select Your Level", but it's the same button we click.
-      const btn = screen.getByRole('button', { name: /select your level/i })
-      await user.click(btn)
+      await user.click(getStartButton()!)
 
       expect(alertSpy).toHaveBeenCalledTimes(1)
       expect(alertSpy).toHaveBeenCalledWith(
@@ -140,7 +140,7 @@ describe('Onboarding', () => {
       const user = userEvent.setup()
       render(<Onboarding />)
 
-      await user.click(screen.getByRole('button', { name: /select your level/i }))
+      await user.click(getStartButton()!)
 
       expect(mockNavigate).not.toHaveBeenCalled()
     })
@@ -149,7 +149,7 @@ describe('Onboarding', () => {
       const user = userEvent.setup()
       render(<Onboarding />)
 
-      await user.click(screen.getByRole('button', { name: /select your level/i }))
+      await user.click(getStartButton()!)
 
       expect(mockInitializeUserProgress).not.toHaveBeenCalled()
     })
@@ -162,25 +162,14 @@ describe('Onboarding', () => {
     { level: 'intermediate', expectedPath: '/learning-path/intermediate' },
     { level: 'expert', expectedPath: '/learning-path/expert' },
   ])('navigation for $level level', ({ level, expectedPath }) => {
-    it(`navigates to ${expectedPath} after selecting ${level} and clicking the button`, async () => {
+    it(`navigates to ${expectedPath} after selecting ${level} and clicking start`, async () => {
       const user = userEvent.setup()
       render(<Onboarding />)
 
-      // Click the level card
-      const levelBtn = screen.getByRole('button', {
-        name: new RegExp(`${level}`, 'i'),
-      })
-      await user.click(levelBtn)
+      await user.click(screen.getByRole('button', { name: new RegExp(`${level}`, 'i') }))
+      await user.click(getStartButton()!)
 
-      // Click "Begin Your Journey" button
-      await user.click(
-        screen.getByRole('button', { name: /begin your journey/i }),
-      )
-
-      // Should have called initializeUserProgress with the level
       expect(mockInitializeUserProgress).toHaveBeenCalledWith(level)
-
-      // Should have navigated to the correct path
       expect(mockNavigate).toHaveBeenCalledWith(expectedPath)
     })
   })
@@ -188,29 +177,22 @@ describe('Onboarding', () => {
   // ── Console.log ──────────────────────────────────────────────────────────────
 
   describe('console.log statements', () => {
-    it('logs the selected level and "Begin Journey Clicked" on button click', async () => {
+    it('logs the selected level and "Begin Journey Clicked" on start', async () => {
       const user = userEvent.setup()
       render(<Onboarding />)
 
-      // Select a level
       await user.click(screen.getByRole('button', { name: /intermediate/i }))
-      // Click the journey button
-      await user.click(
-        screen.getByRole('button', { name: /begin your journey/i }),
-      )
+      await user.click(getStartButton()!)
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        'Selected Level:',
-        'intermediate',
-      )
+      expect(consoleLogSpy).toHaveBeenCalledWith('Selected Level:', 'intermediate')
       expect(consoleLogSpy).toHaveBeenCalledWith('Begin Journey Clicked')
     })
 
-    it('logs when no level is selected (shows null)', async () => {
+    it('logs "null" and "Begin Journey Clicked" with no selection', async () => {
       const user = userEvent.setup()
       render(<Onboarding />)
 
-      await user.click(screen.getByRole('button', { name: /select your level/i }))
+      await user.click(getStartButton()!)
 
       expect(consoleLogSpy).toHaveBeenCalledWith('Selected Level:', null)
       expect(consoleLogSpy).toHaveBeenCalledWith('Begin Journey Clicked')
@@ -220,32 +202,24 @@ describe('Onboarding', () => {
   // ── Loading state ────────────────────────────────────────────────────────────
 
   describe('loading state', () => {
-    it('disables the button and shows "Setting up..." while initializing', async () => {
-      // Make the init promise stay unresolved so we can observe loading UI
+    it('disables the button and shows "initializing..." while loading', async () => {
       let resolvePromise!: () => void
       mockInitializeUserProgress.mockReturnValue(
-        new Promise<void>(resolve => {
-          resolvePromise = resolve
-        }),
+        new Promise<void>(resolve => { resolvePromise = resolve }),
       )
 
       const user = userEvent.setup()
       render(<Onboarding />)
 
       await user.click(screen.getByRole('button', { name: /beginner/i }))
-      await user.click(
-        screen.getByRole('button', { name: /begin your journey/i }),
-      )
+      await user.click(getStartButton()!)
 
-      // Button should be disabled and show loading text
-      const loadingBtn = screen.getByRole('button', { name: /setting up/i })
+      const loadingBtn = getStartButton()
+      expect(loadingBtn).toBeTruthy()
+      expect(loadingBtn!.textContent).toContain('initializing')
       expect(loadingBtn).toBeDisabled()
 
-      // Resolve the promise
       resolvePromise()
-
-      // Wait for the component to re-render after state update
-      // The button should enable again eventually (after navigating)
     })
   })
 
@@ -260,57 +234,42 @@ describe('Onboarding', () => {
       render(<Onboarding />)
 
       await user.click(screen.getByRole('button', { name: /beginner/i }))
-      await user.click(
-        screen.getByRole('button', { name: /begin your journey/i }),
-      )
+      await user.click(getStartButton()!)
 
-      // Wait for the promise to reject and state to update
-      // The button should no longer be disabled after error
-      const journeyBtn = await screen.findByRole('button', {
-        name: /begin your journey/i,
-      })
-      expect(journeyBtn).not.toBeDisabled()
+      // Wait for the error state to resolve
+      const startBtn = getStartButton()
+      expect(startBtn).not.toBeDisabled()
 
-      // Should have called console.error with the error
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Failed to initialize:',
         testError,
       )
-
-      // Should NOT have navigated
       expect(mockNavigate).not.toHaveBeenCalled()
     })
   })
 
-  // ── Button is always clickable ───────────────────────────────────────────────
+  // ── Button clickability ──────────────────────────────────────────────────────
 
   describe('button clickability', () => {
     it('is NOT disabled even when no level is selected', () => {
       render(<Onboarding />)
-      const btn = screen.getByRole('button', { name: /select your level/i })
-      expect(btn).not.toBeDisabled()
+      expect(getStartButton()).not.toBeDisabled()
     })
 
     it('is disabled only during loading', async () => {
       let resolvePromise!: () => void
       mockInitializeUserProgress.mockReturnValue(
-        new Promise<void>(resolve => {
-          resolvePromise = resolve
-        }),
+        new Promise<void>(resolve => { resolvePromise = resolve }),
       )
 
       const user = userEvent.setup()
       render(<Onboarding />)
 
       await user.click(screen.getByRole('button', { name: /beginner/i }))
-      await user.click(
-        screen.getByRole('button', { name: /begin your journey/i }),
-      )
+      await user.click(getStartButton()!)
 
-      // Should be disabled while loading
-      expect(screen.getByRole('button', { name: /setting up/i })).toBeDisabled()
+      expect(getStartButton()).toBeDisabled()
 
-      // Resolve so cleanup doesn't cause issues
       resolvePromise()
     })
   })

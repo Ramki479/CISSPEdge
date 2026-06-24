@@ -1,20 +1,24 @@
-import type { DomainAnalytics, TestSession, DomainClassification } from '../types';
+import type { DomainAnalytics, UserAnswer, DomainClassification } from '../types';
 import { domains } from '../data/questionBank';
 
 export function calculateDomainAnalytics(
   domainId: number,
-  sessions: TestSession[]
+  answers: UserAnswer[],
+  questionDomainMap?: Map<string, number>,
 ): DomainAnalytics {
   let questionsAttempted = 0;
   let correctAnswers = 0;
   let totalTimeSpent = 0;
 
-  for (const session of sessions) {
-    for (const answer of session.answers) {
-      questionsAttempted++;
-      if (answer.isCorrect) correctAnswers++;
-      totalTimeSpent += answer.timeSpent;
+  for (const answer of answers) {
+    // If we have a domain mapping, only count answers belonging to this domain
+    if (questionDomainMap) {
+      const answerDomain = questionDomainMap.get(answer.questionId);
+      if (answerDomain !== domainId) continue;
     }
+    questionsAttempted++;
+    if (answer.isCorrect) correctAnswers++;
+    totalTimeSpent += answer.timeSpent;
   }
 
   const accuracy = questionsAttempted > 0 ? (correctAnswers / questionsAttempted) * 100 : 0;

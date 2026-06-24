@@ -21,16 +21,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   });
 
   const toggleTheme = () => {
-    console.log('Theme Toggle Clicked');
     setTheme(prev => {
-      const next = prev === 'dark' ? 'light' : 'dark';
-      console.log('Theme changed to:', next);
-      return next;
+      return prev === 'dark' ? 'light' : 'dark';
     });
   };
 
   useEffect(() => {
-    console.log('Current Theme:', theme);
     localStorage.setItem('cissp-theme', theme);
     document.documentElement.classList.toggle('dark', theme === 'dark');
     document.documentElement.classList.toggle('light', theme === 'light');
