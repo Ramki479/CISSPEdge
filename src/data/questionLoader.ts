@@ -9,7 +9,7 @@
  * or after data reset).
  */
 
-import { db, seedQuestionsIfNeeded } from './database';
+import { db, seedQuestionsIfNeeded } from '.';
 import type { Question } from '../types';
 
 /* ─── In-memory guard — prevents double-seeding in the same session ────── */

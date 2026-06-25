@@ -47,10 +47,16 @@ const mockGetUserProgress = vi.fn();
 const mockFetchDomainAnalytics = vi.fn();
 const mockUpdateUserProgress = vi.fn();
 
-vi.mock('../data/database', () => ({
+vi.mock('../data', () => ({
   getUserProgress: (...args: unknown[]) => mockGetUserProgress(...args),
   fetchDomainAnalytics: (...args: unknown[]) => mockFetchDomainAnalytics(...args),
   updateUserProgress: (...args: unknown[]) => mockUpdateUserProgress(...args),
+  db: {
+    testSessions: { count: vi.fn().mockResolvedValue(5) },
+    progress: { toArray: vi.fn().mockResolvedValue([]) },
+    answers: { toArray: vi.fn().mockResolvedValue([]) },
+    questions: { toArray: vi.fn().mockResolvedValue([]) },
+  } as any,
 }));
 
 vi.mock('../utils/adaptiveTesting', () => ({

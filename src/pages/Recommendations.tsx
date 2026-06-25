@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { fetchDomainAnalytics } from '../data/database';
+import { fetchDomainAnalytics } from '../data';
 import { ErrorState } from '../components/ui/ErrorState';
 import { generateRecommendations, generateStudySequence } from '../utils/recommendations';
-import { domains } from '../data/questionBank';
+import { domains } from '../data/domains';
 import type { LearningRecommendation } from '../types';
 
 const containerVariants = {

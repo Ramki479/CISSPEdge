@@ -1,5 +1,5 @@
 import type { DomainAnalytics, UserAnswer, DomainClassification } from '../types';
-import { domains } from '../data/questionBank';
+import { domains } from '../data/domains';
 
 export function calculateDomainAnalytics(
   domainId: number,

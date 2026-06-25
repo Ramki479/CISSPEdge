@@ -1,6 +1,6 @@
 import type { SkillArea, SkillAssessment, SkillLevel, KnowledgeGap, ExamReadinessReport, UserAnswer, Question, DomainAnalytics } from '../types';
 import { SKILL_AREAS, SKILL_AREA_TO_DOMAIN } from '../types';
-import { domains } from '../data/questionBank';
+import { domains } from '../data/domains';
 
 /* ─── Skill Level Thresholds ─────────────────────────────────────────────── */
 const SKILL_LEVEL_THRESHOLDS: { level: SkillLevel; minScore: number }[] = [

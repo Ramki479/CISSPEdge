@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getUserProgress, updateUserProgress, db } from '../data/database';
+import { getUserProgress, updateUserProgress, db } from '../data';
 import { ErrorState } from '../components/ui/ErrorState';
 import { NotificationSettingRow } from '../components/ui/NotificationSettingRow';
 import { useTheme } from '../components/ThemeProvider';

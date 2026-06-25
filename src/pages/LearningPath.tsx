@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getUserProgress, fetchDomainAnalytics } from '../data/database';
+import { getUserProgress, fetchDomainAnalytics } from '../data';
 import { domainContent, getTotalLearningHours } from '../data/learningContent';
 import type { PreparationLevel, UserProgress, DomainAnalytics } from '../types';
 

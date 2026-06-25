@@ -1,5 +1,5 @@
 import type { DomainAnalytics, LearningRecommendation } from '../types';
-import { domains } from '../data/questionBank';
+import { domains } from '../data/domains';
 
 export function generateRecommendations(domainAnalytics: DomainAnalytics[]): LearningRecommendation[] {
   const recommendations: LearningRecommendation[] = [];

@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { DashboardSkeleton } from '../components/ui/SkeletonCard';
 import { ErrorState } from '../components/ui/ErrorState';
-import { getUserProgress, fetchDomainAnalytics, updateUserProgress, db } from '../data/database';
+import { getUserProgress, fetchDomainAnalytics, updateUserProgress, db } from '../data';
 import { calculateReadinessScore, calculateConfidenceScore, estimatePassProbability, recommendExamDate } from '../utils/adaptiveTesting';
 import { generateRecommendations } from '../utils/recommendations';
-import { domains } from '../data/questionBank';
+import { domains } from '../data/domains';
 import type { UserProgress, LearningRecommendation } from '../types';
 
 /* ─── Easing tokens ─────────────────────────────────────────────────────── */

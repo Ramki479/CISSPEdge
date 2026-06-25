@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { StudyPlannerSkeleton } from '../components/ui/SkeletonCard';
 import { ErrorState } from '../components/ui/ErrorState';
 import { v4 as uuidv4 } from 'uuid';
-import { db } from '../data/database';
+import { db } from '../data';
 import type { StudyPlan, DailyGoal } from '../types';
 
 /* ─── Easing ─────────────────────────────────────────────────────────────── */

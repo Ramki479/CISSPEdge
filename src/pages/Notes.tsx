@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { NotesSkeleton } from '../components/ui/SkeletonCard';
 import { ErrorState } from '../components/ui/ErrorState';
 import { v4 as uuidv4 } from 'uuid';
-import { db } from '../data/database';
+import { db } from '../data';
 import { playSave } from '../utils/sounds';
-import { domains } from '../data/questionBank';
+import { domains } from '../data/domains';
 import type { StudyNote } from '../types';
 
 /* ─── Easing ─────────────────────────────────────────────────────────────── */

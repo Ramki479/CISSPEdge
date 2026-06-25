@@ -1,4 +1,4 @@
-import { db } from '../database';
+import { db } from '..';
 import type { TestSession } from '../../types';
 
 const MIGRATION_FLAG = 'answers_migrated_v1';

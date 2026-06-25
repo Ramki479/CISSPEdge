@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Layout } from './components/Layout';
 import { LoadingScreen } from './components/LoadingScreen';
-import { getUserProgress, seedTestDataIfNeeded } from './data/database';
+import { getUserProgress, seedTestDataIfNeeded } from './data';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Route-level code-split pages (loaded on demand)

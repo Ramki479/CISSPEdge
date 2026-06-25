@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { QuestionReviewSkeleton } from '../components/ui/SkeletonCard';
 import { ErrorState } from '../components/ui/ErrorState';
-import { db, getSessionAnswers } from '../data/database';
+import { db, getSessionAnswers } from '../data';
 import { loadQuestions } from '../data/questionLoader';
 import type { Question, TestSession, UserAnswer } from '../types';
 

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { KnowledgeMapSkeleton } from '../components/ui/SkeletonCard';
 import { ErrorState } from '../components/ui/ErrorState';
-import { fetchDomainAnalytics } from '../data/database';
-import { domains } from '../data/questionBank';
+import { fetchDomainAnalytics } from '../data';
+import { domains } from '../data/domains';
 import type { DomainAnalytics } from '../types';
 
 /* ─── Easing ─────────────────────────────────────────────────────────────── */

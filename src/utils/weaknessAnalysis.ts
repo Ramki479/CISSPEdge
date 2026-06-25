@@ -9,7 +9,7 @@
  */
 
 import { domainContent } from '../data/learningContent';
-import { domains } from '../data/questionBank';
+import { domains } from '../data/domains';
 import type { DomainAnalytics, UserAnswer, Question } from '../types';
 import type { TopicAnalytics } from './topicMapping';
 

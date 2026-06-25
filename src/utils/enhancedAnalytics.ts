@@ -1,6 +1,6 @@
 import type { DomainAnalytics, SkillAssessment, KnowledgeGap, ExamReadinessReport, UserAnswer, Question, SkillArea } from '../types';
 import { SKILL_AREAS, SKILL_AREA_TO_DOMAIN } from '../types';
-import { domains } from '../data/questionBank';
+import { domains } from '../data/domains';
 import { calculateSkillAssessments, identifyKnowledgeGaps, generateExamReadinessReport } from './skillsAssessment';
 
 /* ─── Enhanced Domain Analytics with Trend ─────────────────────────────────── */

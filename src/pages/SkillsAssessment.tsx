@@ -6,13 +6,13 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell,
 } from 'recharts';
 import { LoadingScreen } from '../components/LoadingScreen';
-import { fetchDomainAnalytics, db, getSessionAnswers } from '../data/database';
+import { fetchDomainAnalytics, db, getSessionAnswers } from '../data';
 import { loadQuestions } from '../data/questionLoader';
 import { SKILL_AREAS, SKILL_AREA_TO_DOMAIN } from '../types';
 import { calculateSkillAssessments, identifyKnowledgeGaps, generateExamReadinessReport } from '../utils/skillsAssessment';
 import { generateFullExamReadinessReport, getWeakestSkillAreas, recommendStudyTime } from '../utils/enhancedAnalytics';
 import { useAsyncError } from '../hooks/useAsyncError';
-import { domains } from '../data/questionBank';  // small — stays static
+import { domains } from '../data/domains';
 import type { SkillAssessment, KnowledgeGap, ExamReadinessReport, SkillArea, DomainAnalytics } from '../types';
 
 /* ─── Easing ─────────────────────────────────────────────────────────────── */

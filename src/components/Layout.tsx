@@ -113,7 +113,7 @@ export function Layout() {
 
         <div className="relative z-10 flex flex-col h-full">
           {/* Brand header */}
-          <div className="flex items-center gap-3 px-6 py-5 border-b tw-border">
+          <div className="flex items-center gap-3 px-6 py-5 border-b tw-border glass-light" style={{ background: 'rgba(8, 11, 20, 0.92)' }}>
             <div className="relative w-9 h-9 flex items-center justify-center">
               <div className="absolute inset-0 bg-gradient-to-br from-[#00f0ff] to-[#ff00e4] rounded-lg opacity-20 blur-sm" />
               <div className="absolute inset-0 bg-gradient-to-br from-[#00f0ff] to-[#ff00e4] rounded-lg opacity-40" />

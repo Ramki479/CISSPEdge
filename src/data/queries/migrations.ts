@@ -1,123 +1,6 @@
-import Dexie, { type Table } from 'dexie';
-import type { UserProgress, TestSession, FlashCard, StudyNote, StudyPlan, DailyChallenge, UserAnswer, Question } from '../types';
-import { calculateDomainAnalytics } from '../utils/analytics';
-import { computeTopicAnalyticsFromAnswers, type TopicAnalytics } from '../utils/topicMapping';
-
-class CisspDatabase extends Dexie {
-  progress!: Table<UserProgress>;
-  testSessions!: Table<TestSession>;
-  answers!: Table<UserAnswer>;
-  flashcards!: Table<FlashCard>;
-  notes!: Table<StudyNote>;
-  studyPlans!: Table<StudyPlan>;
-  dailyChallenges!: Table<DailyChallenge>;
-  questions!: Table<Question>;
-
-  constructor() {
-    super('CISSP_OFFLINE');
-    this.version(3).stores({
-      progress: '++id',
-      testSessions: 'id, mode, domainId, startedAt, completedAt',
-      answers: 'questionId, testSessionId, topicId, domainId, timestamp',
-      flashcards: 'id, domainId, bookmarked, nextReviewDue',
-      notes: 'id, domainId, createdAt',
-      studyPlans: 'id, targetDate',
-      dailyChallenges: 'id, date, domainId',
-      questions: 'id, domainId, type, difficulty',
-    });
-  }
-}
-
-let _db: CisspDatabase | null = null;
-let _dbError: Error | null = null;
-
-/**
- * Lazily initialises the Dexie database instance.
- *
- * IMPORTANT: We do NOT create the instance at module level because
- * Dexie's constructor accesses IndexedDB synchronously. If IndexedDB is
- * unavailable (private browsing, permissions, etc.), the module import
- * itself would crash, preventing React from ever mounting.  By deferring
- * creation to first use, we let React mount first and handle any DB
- * error gracefully inside the error boundary.
- *
- * Instead of throwing synchronously, this returns null on failure so
- * callers can handle the missing-DB case gracefully rather than crashing.
- */
-export function getDb(): CisspDatabase | null {
-  if (_dbError) {
-    if (import.meta.env.DEV) console.error('[database] DB init previously failed:', _dbError);
-    return null;
-  }
-  if (_db) return _db;
-  try {
-    _db = new CisspDatabase();
-    return _db;
-  } catch (err) {
-    _dbError = err instanceof Error ? err : new Error(String(err));
-    if (import.meta.env.DEV) console.error('[database] DB init failed:', _dbError);
-    return null;
-  }
-}
-
-/** Convenience reference — safe for use after initialisation. */
-export const db: CisspDatabase = new Proxy({} as CisspDatabase, {
-  get(_target, prop) {
-    const instance = getDb();
-    if (!instance) {
-      // Return a safe no-op proxy for any method call, or undefined for property access
-      if (typeof prop === 'string' && (prop === 'then' || prop === 'catch' || prop === 'finally')) {
-        return undefined;
-      }
-      // Return a proxy that safely handles async calls (toArray, add, update, etc.)
-      return new Proxy(() => Promise.reject(new Error('Database unavailable')), {
-        get(_t, p) {
-          if (p === 'then' || p === 'catch' || p === 'finally') return undefined;
-          return () => Promise.reject(new Error('Database unavailable'));
-        },
-      });
-    }
-    return (instance as any)[prop];
-  },
-  set(_target, prop, value) {
-    const instance = getDb();
-    if (instance) {
-      (instance as any)[prop] = value;
-    }
-    return true;
-  },
-});
-
-export async function initializeUserProgress(level: UserProgress['level']): Promise<UserProgress> {
-  const existing = await db.progress.toArray();
-  if (existing.length > 0) {
-    return existing[0];
-  }
-  const progress: UserProgress = {
-    level,
-    totalXp: 0,
-    streak: 0,
-    lastActiveDate: new Date().toISOString().split('T')[0],
-    badges: [],
-    completedOnboarding: true,
-    onboardingDate: Date.now(),
-    soundEnabled: true,
-  };
-  await db.progress.add(progress);
-  return progress;
-}
-
-export async function getUserProgress(): Promise<UserProgress | null> {
-  const all = await db.progress.toArray();
-  return all.length > 0 ? all[0] : null;
-}
-
-export async function updateUserProgress(updates: Partial<UserProgress>): Promise<void> {
-  const current = await getUserProgress();
-  if (current) {
-    await db.progress.update((current as UserProgress & { id: number }).id, updates);
-  }
-}
+import { db } from '../db';
+import { calculateDomainAnalytics } from '../../utils/analytics';
+import type { FlashCard, StudyNote, UserProgress, Question } from '../../types';
 
 /**
  * Compute domain analytics from all stored test sessions.
@@ -147,93 +30,6 @@ export async function fetchDomainAnalytics(domainId?: number) {
   }
   const domainIds = [1, 2, 3, 4, 5, 6, 7, 8];
   return domainIds.map(id => calculateDomainAnalytics(id, allAnswers, questionDomainMap));
-}
-
-/* ─── Answer query helpers ─────────────────────────────────────────────── */
-
-/**
- * Load all answers for a given test session from the answers table.
- */
-export async function getSessionAnswers(sessionId: string): Promise<UserAnswer[]> {
-  return db.answers.where('testSessionId').equals(sessionId).toArray();
-}
-
-/**
- * Compute per-topic analytics from all stored answers.
- *
- * This gives REAL topic-level accuracy (not estimated from domain data)
- * by using the concepts and topicId that were stored at answer time.
- *
- * Returns an array of { domainId, topicId, topicTitle, questionsAttempted,
- * correctAnswers, accuracy } sorted weakest-first.
- */
-export async function fetchTopicAnalytics(): Promise<TopicAnalytics[]> {
-  // Use the indexed topicId column to load only answers with topic data
-  const allAnswers = await db.answers.toArray();
-  const validAnswers = allAnswers.filter(a => a.topicId);
-  return computeTopicAnalyticsFromAnswers(validAnswers);
-}
-
-/**
- * Compute per-topic analytics for a specific domain.
- */
-export async function fetchTopicAnalyticsByDomain(domainId: number): Promise<TopicAnalytics[]> {
-  const allAnswers = await db.answers
-    .where('domainId')
-    .equals(domainId)
-    .toArray();
-  const validAnswers = allAnswers.filter(a => a.topicId);
-  return computeTopicAnalyticsFromAnswers(validAnswers);
-}
-
-/* ─── Lazy question loading from IndexedDB ──────────────────────────────── */
-
-/**
- * Load all questions from IndexedDB, or return null if not yet seeded.
- */
-export async function getAllQuestions(): Promise<Question[]> {
-  try {
-    return await db.questions.toArray();
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Load questions filtered by domain ID.
- */
-export async function getQuestionsByDomain(domainId: number): Promise<Question[]> {
-  try {
-    return await db.questions.where('domainId').equals(domainId).toArray();
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Seed questions into IndexedDB if the table is empty.
- */
-export async function seedQuestionsIfNeeded(): Promise<void> {
-  try {
-    const count = await db.questions.count();
-    if (count > 0) return;
-
-    // Dynamically import the large question bank — this keeps it out of the
-    // main bundle and loads it only when seeding (first visit or after clear).
-    const [bankModule, enhancedModule] = await Promise.all([
-      import('../data/questionBank'),
-      import('../data/enhancedQuestions'),
-    ]);
-
-    const allQuestions: Question[] = [
-      ...bankModule.questions,
-      ...enhancedModule.enhancedQuestions,
-    ];
-
-    await db.questions.bulkAdd(allQuestions);
-  } catch {
-    // Non-critical — questions table may be empty on first visit
-  }
 }
 
 /* ─── Seed Data: auto-seed all tables on first mount ───────────────────── */
@@ -266,15 +62,70 @@ const SEED_NOTES: Omit<StudyNote, 'id'>[] = [
   { domainId: 8, title: 'OWASP Top 10 Highlights', content: '1. Broken Access Control 2. Crypto Failures 3. Injection 4. Insecure Design 5. Security Misconfiguration 6. Vulnerable Components 7. Auth Failures 8. Integrity Failures 9. Logging Failures 10. SSRF.', tags: ['OWASP', 'web security'], createdAt: Date.now() - 86400000 * 2, updatedAt: Date.now() - 86400000, isRevision: false },
 ];
 
+/**
+ * Internal duplicate of seedQuestionsIfNeeded to avoid cross-query import (Rule D).
+ * Queries database.ts directly via db instead of importing from ./questions.
+ */
+async function _seedQuestions(): Promise<void> {
+  try {
+    const count = await db.questions.count();
+    if (count > 0) return;
+
+    const [bankModule, enhancedModule] = await Promise.all([
+      import('../questionBank'),
+      import('../enhancedQuestions'),
+    ]);
+
+    const allQuestions: Question[] = [
+      ...bankModule.questions,
+      ...enhancedModule.enhancedQuestions,
+    ];
+
+    await db.questions.bulkAdd(allQuestions);
+  } catch {
+    // Non-critical — questions table may be empty on first visit
+  }
+}
+
+/**
+ * Internal duplicate of getUserProgress to avoid cross-query import (Rule D).
+ */
+async function _getProgress(): Promise<UserProgress | null> {
+  const all = await db.progress.toArray();
+  return all.length > 0 ? all[0] : null;
+}
+
+/**
+ * Internal duplicate of initializeUserProgress to avoid cross-query import (Rule D).
+ */
+async function _initProgress(level: UserProgress['level']): Promise<UserProgress> {
+  const existing = await db.progress.toArray();
+  if (existing.length > 0) {
+    return existing[0];
+  }
+  const progress: UserProgress = {
+    level,
+    totalXp: 0,
+    streak: 0,
+    lastActiveDate: new Date().toISOString().split('T')[0],
+    badges: [],
+    completedOnboarding: true,
+    onboardingDate: Date.now(),
+    soundEnabled: true,
+  };
+  await db.progress.add(progress);
+  return progress;
+}
+
 export async function seedTestDataIfNeeded(): Promise<void> {
   try {
     // Seed questions first (this lazy-loads the question bank from dynamic import)
-    await seedQuestionsIfNeeded();
+    await _seedQuestions();
 
-    let progress = await getUserProgress();
+    let progress = await _getProgress();
     if (!progress) {
       // Auto-initialize user if completely empty
-      progress = await initializeUserProgress('intermediate');
+      progress = await _initProgress('intermediate');
     }
 
     /* ── Seed flashcards (only if table is empty) ──────────────────────── */

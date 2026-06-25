@@ -7,10 +7,10 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell,
 } from 'recharts';
-import { fetchDomainAnalytics } from '../data/database';
+import { fetchDomainAnalytics } from '../data';
 import { calculateOverallStats } from '../utils/analytics';
 import { generateRecommendations } from '../utils/recommendations';
-import { domains } from '../data/questionBank';
+import { domains } from '../data/domains';
 import type { DomainAnalytics, LearningRecommendation } from '../types';
 
 /* ─── Easing tokens ─────────────────────────────────────────────────────── */

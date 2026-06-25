@@ -7,7 +7,7 @@
  * before playing — no sound if it's disabled.
  * ───────────────────────────────────────────────────────────────────────── */
 
-import { getUserProgress } from '../data/database';
+import { getUserProgress } from '../data';
 
 let audioCtx: AudioContext | null = null;
 

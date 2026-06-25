@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
-import { getUserProgress, db, updateUserProgress } from '../data/database';
+import { getUserProgress, db, updateUserProgress } from '../data';
 import { loadQuestions } from '../data/questionLoader';
 import {
   getAdaptiveConfig,
@@ -20,7 +20,7 @@ import { calculateXpForAnswer, calculateTestBonus } from '../utils/gamification'
 import { playCorrect } from '../utils/sounds';
 import { useAsyncError } from '../hooks/useAsyncError';
 import { DragDropQuestion } from '../components/DragDropQuestion';
-import { domains } from '../data/questionBank';
+import { domains } from '../data/domains';
 import { getAnswerMetadata } from '../utils/topicMapping';
 import type { Question, TestSession, UserAnswer, TestMode, DragReorderAnswer, MatchFollowingAnswer } from '../types';
 

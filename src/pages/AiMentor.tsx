@@ -2,10 +2,10 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { searchCisspKnowledge, getQuickActions, generateDomainInsights } from '../utils/cisspMentor';
-import { fetchTopicAnalytics } from '../data/database';
+import { fetchTopicAnalytics } from '../data';
 import type { FlashcardData, ComparisonData } from '../utils/cisspMentor';
 import type { TopicAnalytics } from '../utils/topicMapping';
-import { fetchDomainAnalytics } from '../data/database';
+import { fetchDomainAnalytics } from '../data';
 import type { MentorMessage, TutorMode, StructuredAnswer } from '../utils/cisspMentor';
 import type { DomainAnalytics } from '../types';
 

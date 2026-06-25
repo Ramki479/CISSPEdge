@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { initializeUserProgress, seedTestDataIfNeeded } from '../data/database';
+import { initializeUserProgress, seedTestDataIfNeeded } from '../data';
 import type { PreparationLevel } from '../types';
 
 const levels: { value: PreparationLevel; title: string; description: string; icon: string; features: string[] }[] = [

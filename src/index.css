@@ -578,7 +578,7 @@ body {
 }
 
 .glass-light {
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(8, 11, 20, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
@@ -1185,6 +1185,14 @@ h1, h2, h3 {
 }
 :root .hover\:bg-\[\#111827\]:hover {
   background-color: var(--color-surface-hover);
+}
+
+/* ── Glass light header text overrides (light mode) ─────────────── */
+:root .glass-light .tw-text-primary {
+  color: #e8edf5;
+}
+:root .glass-light .tw-text-secondary {
+  color: #8892a9;
 }
 
 /* ── Buttons ────────────────────────────────────────────────────── */

@@ -1,11 +1,11 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { fetchDomainAnalytics, db } from '../data/database';
+import { fetchDomainAnalytics, db } from '../data';
 import { buildWeaknessReport, getHeatmapColor, getHeatmapBg, PERFORMANCE_BANDS, calculateExamReadiness } from '../utils/weaknessAnalysis';
 import { downloadStudyPlanPdf } from '../utils/pdfStudyPlan';
-import { fetchTopicAnalytics } from '../data/database';
-import { domains } from '../data/questionBank';
+import { fetchTopicAnalytics } from '../data';
+import { domains } from '../data/domains';
 import { domainContent } from '../data/learningContent';
 import type { DomainAnalytics } from '../types';
 import type { TopicAnalytics } from '../utils/topicMapping';
